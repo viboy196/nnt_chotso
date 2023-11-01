@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, useMemo} from 'react';
+import React, {useState, useEffect, useRef, useMemo, useCallback} from 'react';
 import {Alert, View, TouchableOpacity, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -194,7 +194,9 @@ const CameraScanningScreen = ({
     }
   };
 
-  const renderDetectorContent = () => {
+  const renderDetectorContent = useCallback(() => {
+    console.log({device, cameraPermission});
+
     if (device && cameraPermission === 'granted') {
       return (
         <>
@@ -220,7 +222,7 @@ const CameraScanningScreen = ({
       );
     }
     return <PermissionsPage setCameraPermission={setCameraPermission} />;
-  };
+  }, [cameraPermission, device, viewCamera]);
 
   return (
     <View style={{flex: 1, justifyContent: 'center'}}>

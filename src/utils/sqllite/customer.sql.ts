@@ -9,16 +9,21 @@ export class CustomerSqlite extends AbstractSqlite<Customer> {
   }
   // lấy các chỉ số chưa ghi , đã ghi ,
   public async FillChiSoScreenRegion(): Promise<ExcuteResult> {
-    const query = `SELECT COUNT(*) FILTER (WHERE Chisomoi <> -1) AS daghi,
-        COUNT(*) FILTER (WHERE Chisomoi = -1) AS chuaghi,
-        COUNT(*) FILTER (WHERE Dongbo = true) AS mount
-        FROM ${this.schema.name};`;
+    // const query = `SELECT COUNT(*) FILTER (WHERE Chisomoi <> -1) AS daghi,
+    //     COUNT(*) FILTER (WHERE Chisomoi = -1) AS chuaghi,
+    //     COUNT(*) FILTER (WHERE Dongbo = true) AS mount
+    //     FROM ${this.schema.name};`;
+    const queryDaghi = `SELECT COUNT(*) FROM ${this.schema.name} WHERE Chisomoi <> -1;`;
+    const restdaghi = await this.db.executeSql(queryDaghi);
+    const daghi = restdaghi[0].rows.item(0)['COUNT(*)'];
 
-    const rest = await this.db.executeSql(query);
-    console.log(rest);
+    const querychuaghi = `SELECT COUNT(*) FROM ${this.schema.name} WHERE Chisomoi = -1;`;
+    const restchuaghi = await this.db.executeSql(querychuaghi);
+    const chuaghi = restchuaghi[0].rows.item(0)['COUNT(*)'];
 
-    const res1 = rest[0].rows.item(0);
-    console.log('FillChiSoScreenRegion res1', res1);
+    const querymount = `SELECT COUNT(*) FROM ${this.schema.name} WHERE Chisomoi <> -1;`;
+    const restmount = await this.db.executeSql(querymount);
+    const mount = restmount[0].rows.item(0)['COUNT(*)'];
 
     const res2 = await this.getFirst();
     //@ts-ignore
@@ -27,7 +32,7 @@ export class CustomerSqlite extends AbstractSqlite<Customer> {
     const mathoiky = 'Tháng ' + (mtk % 100) + '/' + parseInt(`${mtk / 100}`);
     return {
       code: '00',
-      result: {...res1, mathoiky: mathoiky},
+      result: {daghi, chuaghi, mount, mathoiky: mathoiky},
     };
   }
 }
