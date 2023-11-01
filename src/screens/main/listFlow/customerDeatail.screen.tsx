@@ -374,6 +374,7 @@ const CustomerDetailScreen = ({
                     flex: 3,
                     paddingHorizontal: 10,
                     justifyContent: 'flex-end',
+                    alignItems: 'center',
                   }}>
                   <TouchableOpacity
                     disabled={loading}
@@ -414,8 +415,8 @@ const CustomerDetailScreen = ({
                       justifyContent: 'flex-start',
                       alignItems: 'flex-start',
                     }}
-                    resizeMode="contain"
-                    source={{uri: customer.Picture}}>
+                    resizeMode="cover"
+                    source={{uri: customer.Picture + '?time=' + new Date()}}>
                     <View
                       style={{
                         backgroundColor: 'rgba(255,255,255,0.4)',

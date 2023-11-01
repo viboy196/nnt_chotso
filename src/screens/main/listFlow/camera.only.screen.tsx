@@ -3,10 +3,10 @@ import {View, Text, TouchableOpacity, StyleSheet, Image} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
   Camera,
+  CameraPermissionStatus,
   TakePhotoOptions,
   useCameraDevice,
   useCameraFormat,
-  useCameraPermission,
 } from 'react-native-vision-camera';
 import {ListFlowScreenProps} from '../../../navigation/types';
 import ImageResizer from '@bam.tech/react-native-image-resizer';
@@ -14,11 +14,13 @@ import Layout from '../../../constants/Layout';
 import RNFS from 'react-native-fs';
 import {mainColor} from '../../../constants/Colors';
 import {useIsFocused} from '@react-navigation/native';
+import PermissionsPage from '../../../components/Permissions';
 const CameraScreen = ({
   navigation,
   route,
 }: ListFlowScreenProps<'CameraOnly'>) => {
-  const {requestPermission} = useCameraPermission();
+  const [cameraPermission, setCameraPermission] =
+    useState<CameraPermissionStatus>();
   const device = useCameraDevice('back');
   const camera = useRef<Camera>(null);
   const format = useCameraFormat(device, [
@@ -44,10 +46,10 @@ const CameraScreen = ({
   const [image, setImage] = useState<string>();
   useEffect(() => {
     // @ts-ignore
-    if (device === undefined) {
-      requestPermission();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    (async () => {
+      const cameraPermissionStatus = await Camera.requestCameraPermission();
+      setCameraPermission(cameraPermissionStatus);
+    })();
   }, [device]);
 
   const takePicture = async () => {
@@ -56,14 +58,18 @@ const CameraScreen = ({
 
       const manipResult = await ImageResizer.createResizedImage(
         'file://' + photo.path,
-        400,
-        600,
+        (350 * 2) / 3,
+        350,
         'JPEG',
         100,
         0,
         undefined,
         false,
+        {
+          mode: 'cover',
+        },
       );
+      console.log(manipResult);
 
       setImage(manipResult.uri);
     }
@@ -79,7 +85,7 @@ const CameraScreen = ({
       route.params.data.Makhachhang +
       '_' +
       route.params.data.Mathoiky +
-      '.jpg';
+      '.JPEG';
 
     if (fileName === image) {
       navigation.navigate('CustomerDetail', {
@@ -96,6 +102,31 @@ const CameraScreen = ({
       data: route.params.data,
       picture: fileName,
     });
+  };
+
+  const renderDetectorContent = () => {
+    if (device && cameraPermission === 'granted') {
+      return (
+        <>
+          <Camera
+            isActive={isFocused}
+            style={{
+              height: Layout.window.height - 20,
+              width: (3 * (Layout.window.height - 20)) / 4,
+              left:
+                (Layout.window.width - (3 * (Layout.window.height - 20)) / 4) /
+                2,
+              position: 'absolute',
+            }}
+            format={format}
+            device={device}
+            ref={camera}
+            photo={true}
+          />
+        </>
+      );
+    }
+    return <PermissionsPage setCameraPermission={setCameraPermission} />;
   };
   if (!device) {
     return (
@@ -150,20 +181,7 @@ const CameraScreen = ({
   return (
     <View style={{flex: 1, justifyContent: 'center'}}>
       <>
-        <Camera
-          style={{
-            height: Layout.window.height - 20,
-            width: (3 * (Layout.window.height - 20)) / 4,
-            left:
-              (Layout.window.width - (3 * (Layout.window.height - 20)) / 4) / 2,
-            position: 'absolute',
-          }}
-          photo={true}
-          ref={camera}
-          isActive={isFocused}
-          device={device}
-          format={format}
-        />
+        {renderDetectorContent()}
         <TouchableOpacity
           onPress={() => takePicture()}
           style={styles.btnCapture}>

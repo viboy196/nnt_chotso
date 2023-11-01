@@ -6,6 +6,7 @@ import {
   getDBConnection,
 } from '../utils/sqllite';
 import {SchemaCustomer, SchemaRegion} from '../utils/schema';
+import SplashScreen from 'react-native-splash-screen';
 
 export default function useCachedSql() {
   const [customerSqlite, setCustomerSqlite] = useState<CustomerSqlite>();
@@ -29,6 +30,7 @@ export default function useCachedSql() {
     }
 
     loadResourcesAndDataAsync();
+    SplashScreen.hide();
   }, []);
 
   return {isLoadingComplete, customerSqlite, regionSqlite};

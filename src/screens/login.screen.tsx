@@ -1,5 +1,14 @@
 import React, {useState} from 'react';
-import {StyleSheet, View, Image, TouchableOpacity} from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Image,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from 'react-native';
 import {RootStackScreenProps} from '../navigation/types';
 import {Input, Text} from '@rneui/themed';
 import ApiRequest from '../utils/api/base/ApiRequest';
@@ -11,8 +20,12 @@ import {hexToRgba} from '../utils/helper';
 import {Icon} from '@rneui/themed';
 
 const LoginScreen = ({navigation}: RootStackScreenProps<'Login'>) => {
-  const [user, setUser] = useState<string>('CTV045@nnt.com');
-  const [pass, setPass] = useState<string>('ctv045');
+  const [user, setUser] = useState<string>('');
+  const [pass, setPass] = useState<string>('');
+
+  // const [user, setUser] = useState<string>('CTV045@nnt.com');
+  // const [pass, setPass] = useState<string>('ctv045');
+
   const [loading, setLoading] = useState<boolean>(false);
 
   const [strErr, setStrErr] = useState<string>('');
@@ -42,64 +55,68 @@ const LoginScreen = ({navigation}: RootStackScreenProps<'Login'>) => {
   };
 
   return (
-    <>
-      <View style={styles.container}>
-        {loading && <Spinner visible={loading} textStyle={{color: '#FFF'}} />}
-        <View style={styles.logoContainer}>
-          <Image
-            style={styles.logo}
-            source={require('../assets/img/logo.png')}
-            resizeMode="contain"
-          />
-        </View>
-        <View style={styles.formContainer}>
-          <Input
-            placeholder="Tên đăng nhập"
-            leftIcon={
-              <Icon name="person" size={24} color={hexToRgba(mainColor, 1)} />
-            }
-            autoCapitalize="none"
-            autoCorrect={false}
-            style={styles.input}
-            value={user}
-            onChangeText={setUser}
-          />
-          <Input
-            placeholder="Mật khẩu"
-            leftIcon={
-              <Icon name="lock" size={24} color={hexToRgba(mainColor, 1)} />
-            }
-            autoCapitalize="none"
-            autoCorrect={false}
-            secureTextEntry
-            style={styles.input}
-            value={pass}
-            onChangeText={setPass}
-          />
-        </View>
-        <View style={{alignItems: 'center', marginBottom: 170}}>
-          <Text style={styles.error}>{strErr}</Text>
-          <TouchableOpacity
-            style={styles.buttonContainer}
-            onPress={() => {
-              if (!loading) {
-                Login();
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
+          {loading && <Spinner visible={loading} textStyle={{color: '#FFF'}} />}
+          <View style={styles.logoContainer}>
+            <Image
+              style={styles.logo}
+              source={require('../assets/img/logo.png')}
+              resizeMode="contain"
+            />
+          </View>
+          <View style={styles.formContainer}>
+            <Input
+              placeholder="Tên đăng nhập"
+              leftIcon={
+                <Icon name="person" size={24} color={hexToRgba(mainColor, 1)} />
               }
-            }}>
-            <Text
-              style={{
-                textAlign: 'center',
-                padding: 10,
-                color: '#fff',
-                fontSize: 18,
-                fontWeight: '700',
+              autoCapitalize="none"
+              autoCorrect={false}
+              style={styles.input}
+              value={user}
+              onChangeText={setUser}
+            />
+            <Input
+              placeholder="Mật khẩu"
+              leftIcon={
+                <Icon name="lock" size={24} color={hexToRgba(mainColor, 1)} />
+              }
+              autoCapitalize="none"
+              autoCorrect={false}
+              secureTextEntry
+              style={styles.input}
+              value={pass}
+              onChangeText={setPass}
+            />
+          </View>
+          <View style={{alignItems: 'center', marginBottom: 170}}>
+            <Text style={styles.error}>{strErr}</Text>
+            <TouchableOpacity
+              style={styles.buttonContainer}
+              onPress={() => {
+                if (!loading) {
+                  Login();
+                }
               }}>
-              Đăng nhập
-            </Text>
-          </TouchableOpacity>
+              <Text
+                style={{
+                  textAlign: 'center',
+                  padding: 10,
+                  color: '#fff',
+                  fontSize: 18,
+                  fontWeight: '700',
+                }}>
+                Đăng nhập
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 

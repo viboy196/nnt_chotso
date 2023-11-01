@@ -1,9 +1,10 @@
 import React, {useState, useEffect, useRef, useMemo} from 'react';
-import {Alert, View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import {Alert, View, TouchableOpacity, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import {
   Camera,
+  CameraPermissionStatus,
   TakePhotoOptions,
   useCameraDevice,
   useCameraFormat,
@@ -17,6 +18,7 @@ import {useSqliteContext} from '../../../context/SqliteContext';
 import Spinner from 'react-native-loading-spinner-overlay';
 import {Customer} from '../../../utils/model';
 import {useIsFocused} from '@react-navigation/native';
+import PermissionsPage from '../../../components/Permissions';
 const CameraScanningScreen = ({
   navigation,
 }: RootTabScreenProps<'CameraScanning'>) => {
@@ -24,6 +26,8 @@ const CameraScanningScreen = ({
   const device = useCameraDevice('back');
 
   const {requestPermission} = useCameraPermission();
+  const [cameraPermission, setCameraPermission] =
+    useState<CameraPermissionStatus>();
   const format = useCameraFormat(device, [
     {
       videoResolution: {
@@ -44,9 +48,10 @@ const CameraScanningScreen = ({
   const isFocused = useIsFocused();
   useEffect(() => {
     // @ts-ignore
-    if (device === undefined) {
-      requestPermission();
-    }
+    (async () => {
+      const cameraPermissionStatus = await Camera.requestCameraPermission();
+      setCameraPermission(cameraPermissionStatus);
+    })();
 
     const unsubscribe = navigation.addListener('focus', () => {
       setViewCamera(true);
@@ -189,13 +194,33 @@ const CameraScanningScreen = ({
     }
   };
 
-  if (device === undefined) {
-    return (
-      <View style={{flex: 1}}>
-        <Text style={{color: 'red'}}>Chưa cấp quyền camera</Text>
-      </View>
-    );
-  }
+  const renderDetectorContent = () => {
+    if (device && cameraPermission === 'granted') {
+      return (
+        <>
+          {viewCamera && (
+            <Camera
+              isActive={isFocused}
+              style={{
+                height: Layout.window.height - 20,
+                width: (3 * (Layout.window.height - 20)) / 4,
+                left:
+                  (Layout.window.width -
+                    (3 * (Layout.window.height - 20)) / 4) /
+                  2,
+                position: 'absolute',
+              }}
+              format={format}
+              device={device}
+              ref={camera}
+              photo={true}
+            />
+          )}
+        </>
+      );
+    }
+    return <PermissionsPage setCameraPermission={setCameraPermission} />;
+  };
 
   return (
     <View style={{flex: 1, justifyContent: 'center'}}>
@@ -208,23 +233,7 @@ const CameraScanningScreen = ({
         />
       )}
       <>
-        {viewCamera && (
-          <Camera
-            isActive={isFocused}
-            style={{
-              height: Layout.window.height - 20,
-              width: (3 * (Layout.window.height - 20)) / 4,
-              left:
-                (Layout.window.width - (3 * (Layout.window.height - 20)) / 4) /
-                2,
-              position: 'absolute',
-            }}
-            format={format}
-            device={device}
-            ref={camera}
-            photo={true}
-          />
-        )}
+        {renderDetectorContent()}
         <TouchableOpacity
           onPress={() => takePicture()}
           style={styles.btnCapture}>
