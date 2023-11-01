@@ -1,33 +1,25 @@
-import React, {useState, useEffect, useCallback} from 'react';
-import {View, StyleSheet, Text, Alert, Linking} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {View, StyleSheet, Text, Alert} from 'react-native';
 import {RootTabScreenProps} from '../../../navigation/types';
 import {useSqliteContext} from '../../../context/SqliteContext';
 import {Customer} from '../../../utils/model';
 import {
   Camera,
+  CameraPermissionStatus,
   useCameraDevice,
   useCodeScanner,
 } from 'react-native-vision-camera';
 import {useIsFocused} from '@react-navigation/native';
+import PermissionsPage from '../../../components/Permissions';
 
 const QRScanningScreen = ({navigation}: RootTabScreenProps<'QRScanning'>) => {
   const {customerSqlite} = useSqliteContext();
-  const device = useCameraDevice('back');
+
+  const [cameraPermission, setCameraPermission] =
+    useState<CameraPermissionStatus>();
   const isFocused = useIsFocused();
   const [viewCamera, setViewCamera] = useState<boolean>(true);
 
-  const askForCameraPermission = useCallback(() => {
-    (async () => {
-      const permission = await Camera.requestCameraPermission();
-      console.log('Camera permission status:', permission);
-      if (permission === 'denied') {
-        setViewCamera(false);
-        await Linking.openSettings();
-      } else {
-        setViewCamera(true);
-      }
-    })();
-  }, []);
   const findQRcode = async (qrdata: string) => {
     try {
       if (qrdata === undefined) {
@@ -97,11 +89,13 @@ const QRScanningScreen = ({navigation}: RootTabScreenProps<'QRScanning'>) => {
   };
 
   useEffect(() => {
-    askForCameraPermission();
+    (async () => {
+      const cameraPermissionStatus = await Camera.requestCameraPermission();
+      setCameraPermission(cameraPermissionStatus);
+    })();
     const unsubscribe = navigation.addListener('focus', () => {
       console.log('focus');
       setViewCamera(true);
-      askForCameraPermission();
     });
 
     const unsubscribe1 = navigation.addListener('blur', () => {
@@ -114,7 +108,7 @@ const QRScanningScreen = ({navigation}: RootTabScreenProps<'QRScanning'>) => {
       unsubscribe();
       unsubscribe1();
     };
-  }, [askForCameraPermission, navigation]);
+  }, [navigation, cameraPermission]);
   console.log('viewCamera', viewCamera);
 
   const codeScanner = useCodeScanner({
@@ -130,48 +124,53 @@ const QRScanningScreen = ({navigation}: RootTabScreenProps<'QRScanning'>) => {
       // findQRcode(data);
     },
   });
+  const device = useCameraDevice('back');
+  const renderDetectorContent = () => {
+    if (device && cameraPermission === 'granted') {
+      return (
+        <>
+          {viewCamera && (
+            <Camera
+              codeScanner={codeScanner}
+              style={{
+                flex: 1,
+              }}
+              device={device}
+              isActive={isFocused}
+            />
+          )}
+          <View style={{width: '100%', height: '100%', position: 'absolute'}}>
+            <View style={{height: 140, backgroundColor: 'rgba(0,0,0,0.5)'}} />
 
-  if (!device) {
-    return (
-      <View style={{flex: 1}}>
-        <Text>Requesting for camera permission</Text>
-      </View>
-    );
-  }
+            <View style={{flex: 1, flexDirection: 'row'}}>
+              <View style={{width: 60, backgroundColor: 'rgba(0,0,0,0.5)'}} />
+              <View style={{flex: 1}} />
+              <View style={{width: 60, backgroundColor: 'rgba(0,0,0,0.5)'}} />
+            </View>
+            <View style={{height: 140, backgroundColor: 'rgba(0,0,0,0.5)'}} />
+          </View>
+          <View style={styles.strokeArea1} />
+          <View style={styles.strokeArea2} />
+          <View style={styles.strokeArea3} />
+          <View style={styles.strokeArea4} />
+          <View style={styles.strokeArea5} />
+          <View style={styles.strokeArea6} />
+          <View style={styles.strokeArea7} />
+          <View style={styles.strokeArea8} />
+          <Text style={styles.descArea}>
+            Đưa camera đến vùng chứa QR để quét
+          </Text>
+        </>
+      );
+    }
+    return <PermissionsPage setCameraPermission={setCameraPermission} />;
+  };
 
   return (
     <>
       <View style={{flex: 1, justifyContent: 'center'}}>
-        {viewCamera && device && (
-          <Camera
-            codeScanner={codeScanner}
-            style={{
-              flex: 1,
-            }}
-            device={device}
-            isActive={isFocused}
-          />
-        )}
+        {renderDetectorContent()}
       </View>
-      <View style={{width: '100%', height: '100%', position: 'absolute'}}>
-        <View style={{height: 140, backgroundColor: 'rgba(0,0,0,0.5)'}} />
-
-        <View style={{flex: 1, flexDirection: 'row'}}>
-          <View style={{width: 60, backgroundColor: 'rgba(0,0,0,0.5)'}} />
-          <View style={{flex: 1}} />
-          <View style={{width: 60, backgroundColor: 'rgba(0,0,0,0.5)'}} />
-        </View>
-        <View style={{height: 140, backgroundColor: 'rgba(0,0,0,0.5)'}} />
-      </View>
-      <View style={styles.strokeArea1} />
-      <View style={styles.strokeArea2} />
-      <View style={styles.strokeArea3} />
-      <View style={styles.strokeArea4} />
-      <View style={styles.strokeArea5} />
-      <View style={styles.strokeArea6} />
-      <View style={styles.strokeArea7} />
-      <View style={styles.strokeArea8} />
-      <Text style={styles.descArea}>Đưa camera đến vùng chứa QR để quét</Text>
     </>
   );
 };
