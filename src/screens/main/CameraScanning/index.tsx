@@ -10,7 +10,7 @@ import {
   useCameraPermission,
 } from 'react-native-vision-camera';
 import {RootTabScreenProps} from '../../../navigation/types';
-import TextRecognition from '@react-native-ml-kit/text-recognition';
+import TextRecognition from 'react-native-text-recognition';
 
 import Layout from '../../../constants/Layout';
 import {useSqliteContext} from '../../../context/SqliteContext';
