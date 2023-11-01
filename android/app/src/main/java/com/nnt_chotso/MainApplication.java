@@ -1,4 +1,4 @@
-package com.nnt_chotso;
+package com.ngoctuan.csn;
 
 import android.app.Application;
 import com.facebook.react.PackageList;

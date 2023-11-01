@@ -102,12 +102,13 @@ const CameraScanningScreen = ({
       }
 
       const result = await TextRecognition.recognize('file://' + photo.path);
+      console.log(result);
 
       // 2010068574 kkjhjkhkhkhkhk
       try {
         if (customerSqlite) {
           setLoading({status: true, text: 'Đang nhận dạng'});
-          let str = result.text;
+          let str = result.join(',');
           str = str.replace(/\\s/g, '').replace(/\\r?\\n/g, '');
           const res = await customerSqlite.getFiltered(
             `SELECT * FROM Customer WHERE INSTR('|${str}|' , madongho) > 0 and madongho <> ''`,

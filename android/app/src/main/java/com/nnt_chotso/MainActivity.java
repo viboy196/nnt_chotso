@@ -1,4 +1,4 @@
-package com.nnt_chotso;
+package com.ngoctuan.csn;
 import android.os.Bundle;
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;

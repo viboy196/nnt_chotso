@@ -73,9 +73,9 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "com.nnt_chotso"
+    namespace "com.ngoctuan.csn"
     defaultConfig {
-        applicationId "com.nnt_chotso"
+        applicationId "com.ngoctuan.csn"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -87,6 +87,12 @@ android {
             storePassword 'android'
             keyAlias 'androiddebugkey'
             keyPassword 'android'
+        }
+         release {
+            storeFile file('@viboy196__chotsonnt-keystore.bak.jks')
+            storePassword '178e2a18d9844d3e78be3b0a408267c6'
+            keyAlias '8f18b7dd394d3c81d02f6aa26d47cccb'
+            keyPassword '3248397e297279fc3acd49c99086db4f'
         }
     }
     buildTypes {
@@ -120,6 +126,8 @@ dependencies {
     }
     // Use this dependency to use the dynamically downloaded model in Google Play Services
     implementation 'com.google.mlkit:barcode-scanning:17.2.0'
+    implementation 'com.google.mlkit:text-recognition:16.0.0'
+
 }
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
